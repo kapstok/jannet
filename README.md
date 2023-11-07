@@ -4,6 +4,10 @@ Dit is een programma om met sockets allerlei zaken te doen.
 
 Ik compileer het als een programma dat op elk platform werkt.
 
+## Notities
+
+https://github.com/jart/cosmopolitan/issues/839
+
 ## Building
 
 Om het programma te bouwen gebruik ik dit commando:
