@@ -30,7 +30,7 @@ int get_port() {
       // Handle EOF or error (e.g., when the user presses Ctrl+D)
       printf("Error reading input. Exiting.\n");
       exit(EXIT_FAILURE);
-      }
+    }
 
       inputValid = sscanf(buffer, "%d", &port);
   } while (inputValid <= 0);
@@ -63,21 +63,97 @@ char get_choice(char* prompt, char* choices) {
   return choice;
 }
 
-// Adress needs to be free'd.
+// Address needs to be free'd.
 char* get_address() {
   char* buffer = malloc(sizeof(char) * 512);
 
-  if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
-      // Handle EOF or error (e.g., when the user presses Ctrl+D)
-      printf("Error reading input. Exiting.\n");
-      exit(EXIT_FAILURE);
-  }
-
+  scanf("%s", buffer);
   return buffer;
 }
 
-void setup_client(const char* address, int port) {
+void send_http(char* buffer, int bufsize) {
+  printf("Welke methode wil je aanroepen?\n");
+  fflush(stdout);
+  char method[10];
+  if (fgets(method, sizeof(method) - 1, stdin) == NULL) {
+    // Handle EOF or error (e.g., when the user presses Ctrl+D)
+    printf("Error reading input. Exiting.\n");
+    exit(EXIT_FAILURE);
+  } else {
+    // Remove the newline character if it exists
+    size_t length = strlen(method);
+    if (length > 0 && method[length - 1] == '\n') {
+      method[length - 1] = ' ';
+    }
+  }
+  strcat(buffer, method);
 
+  printf("Wat is de URL (Protocol, hostname en port achterwege laten)?\n");
+  fflush(stdout);
+  char url[100];
+  if (fgets(url, sizeof(url) - 1, stdin) == NULL) {
+    // Handle EOF or error (e.g., when the user presses Ctrl+D)
+    printf("Error reading input. Exiting.\n");
+    exit(EXIT_FAILURE);
+  } else {
+    // Remove the newline character if it exists
+    size_t length = strlen(url);
+    if (length > 0 && url[length - 1] == '\n') {
+      url[length - 1] = ' ';
+    }
+  }
+  strcat(buffer, url);
+  strcat(buffer, " HTTP/1.0\nHost: localhost\n\n\n");
+}
+
+void setup_client(const char* address, int port) {
+    int status, valread, client_fd;
+    struct sockaddr_in serv_addr;
+
+    ubyte sendHttp = get_choice("Wil je een [t]cp of [h]ttp bericht sturen?", "th") == 'h' ? 1:0;
+    char* message = malloc(sizeof(char) * 512);
+    if (sendHttp) {
+      send_http(message, 512);
+    } else {
+      scanf("%s", message);
+    }
+    
+    char buffer[1024] = { 0 };
+    if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+        return -1;
+    }
+ 
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+ 
+    // Convert IPv4 and IPv6 addresses from text to binary
+    // form
+    printf("Adres: (%s)\n", address);
+    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)
+        <= 0) {
+        printf(
+            "\nInvalid address/ Address not supported \n");
+        return -1;
+    }
+ 
+    if ((status
+         = connect(client_fd, (struct sockaddr*)&serv_addr,
+                   sizeof(serv_addr)))
+        < 0) {
+        printf("\nConnection Failed \n");
+        return -1;
+    }
+    send(client_fd, message, strlen(message), 0);
+    // free(message);
+    printf("Verzonden bericht:\n%s\n\n---\n\nBinnenkomend:\n", message);
+    free(message);
+    valread = read(client_fd, buffer, 1024 - 1); // subtract 1 for the null terminator at the end
+    printf("%s\n", buffer);
+ 
+    // closing the connected socket
+    close(client_fd);
+    return 0;
 }
 
 void setup_server(int port) {
