@@ -1,3 +1,11 @@
+#if !defined __COSMOPOLITAN__ || !defined __COSMOCC__
+#error You should use Cosmopolitan to build this. (WEBSITE) justine.lol/cosmopolitan/
+#endif
+
+#ifndef __FATCOSMOCC__
+#warning Hold on! The compiled executable will not be multi-arch.
+#endif
+
 #include "libc/sock/sock.h"
 #include "libc/sock/struct/sockaddr.h"
 #include "libc/stdio/stdio.h"
@@ -15,14 +23,6 @@
 #define EXIT_FAILURE 1
 #define SOCK_STREAM 1
 
-#if !defined __COSMOPOLITAN__ || !defined __COSMOCC__
-#error You should use Cosmopolitan to build this. (WEBSITE) justine.lol/cosmopolitan/
-#endif
-
-#ifndef __FATCOSMOCC__
-#warning Hold on! The compiled executable will not be multi-arch.
-#endif
-
 void printLogo() {
   printf("    _____                   __    __            __\n");
   printf("   |     \\                 |  \\  |  \\          |  \\\n");
@@ -33,6 +33,10 @@ void printLogo() {
   printf("| ▓▓__| ▓▓  ▓▓▓▓▓▓▓ ▓▓  | ▓▓ ▓▓ \\▓▓▓▓ ▓▓▓▓▓▓▓▓ | ▓▓|  \\\n");
   printf(" \\▓▓    ▓▓\\▓▓    ▓▓ ▓▓  | ▓▓ ▓▓  \\▓▓▓\\▓▓     \\  \\▓▓  ▓▓\n");
   printf("  \\▓▓▓▓▓▓  \\▓▓▓▓▓▓▓\\▓▓   \\▓▓\\▓▓   \\▓▓ \\▓▓▓▓▓▓▓   \\▓▓▓▓\n");
+}
+
+void printVersionLine() {
+  printf("\n----------------------- versie 1.1 ----------------------\n\n");
 }
 
 int get_port() {
@@ -89,7 +93,7 @@ char* get_address() {
   return buffer;
 }
 
-void send_http(char* buffer, int bufsize) {
+void send_http(char* buffer, const char* hostname, int bufsize) {
   printf("Welke methode wil je aanroepen?\n");
   fflush(stdout);
   char method[10];
@@ -121,7 +125,11 @@ void send_http(char* buffer, int bufsize) {
     }
   }
   strcat(buffer, url);
-  strcat(buffer, " HTTP/1.0\nHost: localhost\n\n\n");
+  strcat(buffer, "HTTP/1.0\r\nHost: ");
+  strcat(buffer, hostname);
+  //strcat(buffer, "\r\nCache-Control: no-cache\r\n\r\n");
+  strcat(buffer, "\r\n\r\n");
+  printf("%s\n",buffer);
 }
 
 void setup_client(const char* address, int port) {
@@ -131,7 +139,7 @@ void setup_client(const char* address, int port) {
     ubyte sendHttp = get_choice("Wil je een [t]cp of [h]ttp bericht sturen?", "th") == 'h' ? 1:0;
     char* message = malloc(sizeof(char) * 512);
     if (sendHttp) {
-      send_http(message, 512);
+      send_http(message, address, 512);
     } else {
       scanf("%s", message);
     }
@@ -230,7 +238,7 @@ void setup_server(int port) {
 int main() {
   printf("\n---------------   .:: Welkom op het ::.   ---------------\n\n");
   printLogo();
-  printf("\n---------------------------------------------------------\n\n");
+  printVersionLine();
 
   int port = get_port();
   ubyte isClient = get_choice("Wil je [c]lient of [s]erver zijn? ", "cs") == 'c' ? 1 : 0;
