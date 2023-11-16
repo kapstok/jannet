@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export PATH="/opt/cosmo/bin/:$PATH"
+export PATH="/opt/cosmos/bin/:$PATH"
+
+# Disable wine emulation when executing an APE
+sudo sh -c 'echo -1 >/proc/sys/fs/binfmt_misc/status'

@@ -1,9 +1,32 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <sys/socket.h>
+// #include <netinet/in.h>
+#include "libc/sock/sock.h"
+#include "libc/sock/struct/sockaddr.h"
+#include "libc/stdio/stdio.h"
+#include "libc/str/str.h"
+#include "libc/mem/mem.h"
+#include "libc/runtime/runtime.h"
+#include "libc/sysv/consts/af.h"
+#include "libc/calls/weirdtypes.h"
+#include "libc/calls/calls.h"
+#include "libc/sysv/consts/so.h"
+#include "libc/sysv/consts/sol.h"
+#include "libc/sysv/consts/inaddr.h"
 
 #define ubyte char
+#define EXIT_FAILURE 1
+#define SOCK_STREAM 1
+// #define AF_INET 2
+
+#if !defined __COSMOPOLITAN__ || !defined __COSMOCC__
+#error You should use Cosmopolitan to build this. (WEBSITE) justine.lol/cosmopolitan/
+#endif
+
+#ifndef __FATCOSMOCC__
+#warning Hold on! The compiled executable will not be multi-arch.
+#endif
 
 void printLogo() {
   printf("    _____                   __    __            __\n");
