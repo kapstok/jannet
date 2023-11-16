@@ -1,7 +1,3 @@
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <sys/socket.h>
-// #include <netinet/in.h>
 #include "libc/sock/sock.h"
 #include "libc/sock/struct/sockaddr.h"
 #include "libc/stdio/stdio.h"
@@ -18,7 +14,6 @@
 #define ubyte char
 #define EXIT_FAILURE 1
 #define SOCK_STREAM 1
-// #define AF_INET 2
 
 #if !defined __COSMOPOLITAN__ || !defined __COSMOCC__
 #error You should use Cosmopolitan to build this. (WEBSITE) justine.lol/cosmopolitan/
@@ -195,7 +190,7 @@ void setup_server(int port) {
   // Set port and options
   int optionsSet = setsockopt(
     server_fd, SOL_SOCKET,
-    SO_REUSEADDR | SO_REUSEPORT,
+    SO_REUSEADDR,
     &opt, sizeof(opt)
   );
   if (optionsSet == -1) {
